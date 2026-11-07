@@ -1,0 +1,25 @@
+bin/
+dist/
+*.exe
+*.test
+*.out
+coverage.*
+
+node_modules/
+.venv/
+__pycache__/
+web/dist/
+web/.vite/
+
+*.db
+*.sqlite
+uploads/
+
+.DS_Store
+.env
+.env.local
+.idea/
+.vscode/
+
+# Real customer drawings stay local; examples live in skill/*/examples.
+/*.pdf

@@ -1,0 +1,93 @@
+{
+ "view_order": [
+  "Main view",
+  "Side view",
+  "Notes"
+ ],
+ "features": [
+  {
+   "page": 1,
+   "text": "120",
+   "bbox": [
+    254.5,
+    116.5,
+    272.2,
+    127.5
+   ],
+   "view": "Main view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "80",
+   "bbox": [
+    454.5,
+    256.5,
+    466.6,
+    267.5
+   ],
+   "view": "Main view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "4-Ø6",
+   "bbox": [
+    441.5,
+    391.5,
+    459.2,
+    402.5
+   ],
+   "view": "Main view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "R5",
+   "bbox": [
+    103.5,
+    146.5,
+    117.3,
+    157.5
+   ],
+   "view": "Main view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "10",
+   "bbox": [
+    524.5,
+    116.5,
+    536.6,
+    127.5
+   ],
+   "view": "Side view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "200±0,2",
+   "bbox": [
+    554.5,
+    256.5,
+    586.4,
+    267.5
+   ],
+   "view": "Side view",
+   "source": "example"
+  },
+  {
+   "page": 1,
+   "text": "Rz 6,3",
+   "bbox": [
+    119.5,
+    441.5,
+    149.4,
+    452.5
+   ],
+   "view": "Notes",
+   "source": "example"
+  }
+ ]
+}

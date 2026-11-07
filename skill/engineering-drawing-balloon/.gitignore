@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+output/
+*_ballooned.pdf
+*_inspection.xlsx
+*_inspection.csv
+*_review.json
+page_*_NEEDS_AI_OCR.png
+page_*_ocr.png

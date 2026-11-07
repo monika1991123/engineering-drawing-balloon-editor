@@ -1,0 +1,41 @@
+{
+  "radius": 9.4,
+  "font_size": 7.8,
+  "line_width": 0.85,
+  "color": [
+    0.33,
+    0.49,
+    0.68
+  ],
+  "arrow_length": 5,
+  "arrow_width": 2.8,
+  "arrow_tip_gap": 2.4,
+  "leader_clearance": 1,
+  "min_distance_multiplier": 3.55,
+  "distance_multipliers": [
+    3.55,
+    4.35,
+    5.3,
+    6.4,
+    7.8,
+    9.3,
+    11.2,
+    13.5,
+    15.5,
+    18
+  ],
+  "page_margin": 11,
+  "min_ink_clearance": 2.4,
+  "title_block_bottom": 0.81,
+  "title_block_right": 0.52,
+  "top_grid_ignore": 0.085,
+  "left_grid_ignore": 0.045,
+  "line_clearance": 1.5,
+  "max_ink_ratio": 0.012,
+  "leader_crossing_penalty": 0.9,
+  "group_align_tolerance": 3,
+  "order_row_tolerance": 11,
+  "order_block_tolerance": 0.1,
+  "leader_style": "wedge",
+  "wedge_width": 3.6
+}

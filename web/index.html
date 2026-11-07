@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>balloon — drawing inspection sheets</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='13' r='9' fill='none' stroke='%23111' stroke-width='2.5'/><path d='M16 22v8' stroke='%23111' stroke-width='2.5'/></svg>">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+      <circle cx="16" cy="13" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M16 22v8" stroke="currentColor" stroke-width="2.5"/>
+    </svg>
+    <strong>balloon</strong>
+  </div>
+
+  <label class="btn primary">
+    Open drawing
+    <input type="file" id="file" accept="application/pdf" hidden>
+  </label>
+
+  <div class="meta">
+    <label>Part no. <input id="partNumber" placeholder="DWG-1042" size="12"></label>
+    <label>Part name <input id="partName" placeholder="Bracket" size="14"></label>
+    <label>Rev <input id="revision" placeholder="C" size="3"></label>
+    <label>Serial <input id="serial" placeholder="SN-001" size="9"></label>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="pager" hidden>
+    <button class="btn" id="prev" title="Previous sheet">&larr;</button>
+    <span id="pageLabel">1 / 1</span>
+    <button class="btn" id="next" title="Next sheet">&rarr;</button>
+  </div>
+  <button class="btn" id="zoomOut" title="Zoom out">&minus;</button>
+  <button class="btn" id="zoomIn" title="Zoom in">+</button>
+  <button class="btn" id="tidy" title="Re-solve balloon placement for this sheet">Tidy</button>
+  <button class="btn" id="addBalloon" aria-pressed="false">添加气泡</button>
+  <button class="btn primary" id="autoBalloon" disabled>本地自动标注</button>
+  <button class="btn primary" id="skillBalloon" disabled title="调用 engineering-drawing-balloon Skill 排版全部页面；无文字层时先本地识别">Skill 标注</button>
+  <button class="btn" id="autoLayout" disabled>自动调整位置</button>
+  <button class="btn" id="renumber" disabled title="按气泡位置从左上到右下逐行编号；多页按页码连续编号，待放置项接续在后">一键排序</button>
+  <label class="size-control">气泡大小 <select id="balloonSize" aria-label="全部标注大小"><option value="6">小</option><option value="9" selected>标准</option><option value="12">大</option><option value="15">特大</option></select></label>
+  <button class="btn" id="applySize" disabled title="圈、编号和尖尾一起缩放，并根据当前位置调整全部页">统一大小</button>
+  <button class="btn" id="showOcr" aria-pressed="false" disabled>识别框</button>
+  <button class="btn" id="deleteBalloon" disabled>删除选中</button>
+  <button class="btn primary" id="exportPdf" disabled>导出 PDF</button>
+  <button class="btn" id="exportSvg">SVG</button>
+  <button class="btn primary" id="exportXlsx">Export AS9102</button>
+</header>
+
+<main>
+  <section class="stage" id="stage">
+    <div class="empty" id="empty">
+      <h1>Drop a drawing PDF here</h1>
+      <p>
+        Callouts are read from the PDF's text layer, classified, numbered in
+        reading order, and ballooned. 本地自动标注会把页面图像发送到运行本工具的
+        服务器进行 OCR；不会发送到外部 AI 服务。原始 PDF 保留在浏览器。
+      </p>
+      <p class="hint">
+        No drawing to hand? <button class="link" id="loadDemo">Load the demo part</button>
+      </p>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <canvas id="canvas"></canvas>
+      <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="panel-head">
+      <h2>Characteristics</h2>
+      <span class="count" id="count">—</span>
+      <button class="btn small" id="pendingToggle" aria-expanded="false" aria-controls="pendingList" disabled>待放置 0</button>
+      <button class="btn small" id="conflictToggle" aria-expanded="false" aria-controls="conflictList" disabled>位置冲突 0</button>
+    </div>
+    <div id="pendingList" class="pending-list" hidden aria-label="待放置标注列表"></div>
+    <div id="conflictList" class="pending-list" hidden aria-label="位置冲突标注列表"></div>
+
+    <div class="tolerances">
+      <details>
+        <summary>Title block defaults</summary>
+        <p class="note">
+          A dimension written without a tolerance inherits these, chosen by how
+          many decimal places it was typed with.
+        </p>
+        <div class="tolgrid">
+          <label>.X <input type="number" step="0.01" id="tol1" value="0.2"></label>
+          <label>.XX <input type="number" step="0.01" id="tol2" value="0.1"></label>
+          <label>.XXX <input type="number" step="0.001" id="tol3" value="0.05"></label>
+          <label>Angular <input type="number" step="0.1" id="tolAng" value="0.5"></label>
+        </div>
+        <button class="btn small" id="reparse">Re-read drawing</button>
+      </details>
+    </div>
+
+    <div class="warnings" id="warnings" hidden></div>
+    <p class="note manual-help" id="manualHelp" hidden></p>
+    <p class="manual-help" id="ocrStatus" role="status" hidden></p>
+    <div id="selectionPreview" class="manual-help" hidden>
+      <span id="previewLabel"></span><br><img id="previewImage" alt="所选尺寸的原图局部">
+      <div class="engineering-tools">
+        <label for="engineeringValue">工程标注补正</label>
+        <input id="engineeringValue" type="text" placeholder="如 (Ø9.8)、4-R3、45°" aria-label="完整工程标注">
+        <div class="symbol-buttons"><button class="btn small" data-mark="Ø">Ø 直径</button><button class="btn small" data-mark="R">R 半径</button><button class="btn small" data-mark="°">° 角度</button><button class="btn small" data-mark="±">± 公差</button><button class="btn small" data-mark="()">( ) 参考</button><button class="btn small" id="applyEngineering">应用要求</button></div>
+      </div>
+    </div>
+
+    <div class="tablewrap">
+      <table id="table">
+        <thead>
+          <tr>
+            <th class="c">#</th>
+            <th>Requirement</th>
+            <th>Limits</th>
+            <th class="c" title="Include on the inspection report">Insp.</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr class="placeholder"><td colspan="4">Open a drawing to begin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </aside>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/vendor/pdf-lib.min.js"></script>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
